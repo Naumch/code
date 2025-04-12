@@ -12,31 +12,5 @@ code {
     monospace;
 }
 
-.inputWrapper { 
-  width: 192px;
-  overflow: hidden;
-  margin: 100px auto;
-}
-
-.input { 
-  appearance: none; 
-  border: none;
-  border-bottom: 1px solid #A1AFBF; 
-  box-sizing: border-box; 
-  color: #0b1f35; 
-  flex-shrink: 0; 
-  font-size: 32px; 
-  font-weight: 500; 
-  height: 41px; 
-  margin: 0 8px; 
-  outline: none; 
-  text-align: center; 
-  width: 32px; 
-  padding-bottom: 8px; 
-}
-
-.activeInput { 
-  border-color: #292929; 
-} 
 
 

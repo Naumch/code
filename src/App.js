@@ -1,99 +1,57 @@
-import React, {useState, useRef} from "react";
-import cn from "classnames"
+import React from "react";
 
 function App() {
-  const [code, setCode] = useState(Array(4).fill("")) 
+  function getDeviceSpecificLink() {
+    const userAgent = navigator.userAgent.toLowerCase();
+  
+    // Все Huawei и Honor → одна ссылка
+    const isHuaweiOrHonor = /huawei|honor/i.test(userAgent);
+  
+    // Samsung на Android (исключаем SmartTV и другие устройства)
+    const isSamsung = /samsung/i.test(userAgent) && /android/i.test(userAgent);
+  
+    // iOS (iPhone, iPad, iPod)
+    const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+  
+    // Android (но не Samsung/Huawei/Honor)
+    const isGenericAndroid = /android/i.test(userAgent) && !isHuaweiOrHonor && !isSamsung;
+  
+    // Мобильное устройство (для определения десктопа)
+    const isMobile = /mobile|android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  
+    // Ссылки (замените на реальные)
+    const links = {
+      huaweiHonor: 'https://huawei-honor.example.com', // Все Huawei и Honor
+      samsung: 'https://samsung.example.com',          // Только Samsung на Android
+      android: 'https://android.example.com',          // Остальные Android (Xiaomi, Oppo и др.)
+      ios: 'https://ios.example.com',                  // iPhone/iPad
+      desktop: 'https://desktop.example.com',          // Десктопы (Windows/macOS/Linux)
+      default: 'https://default.example.com'           // На случай, если не попали в другие категории
+    };
+  
+    // Выбор ссылки по приоритетам
+    if (isHuaweiOrHonor) {
+      return links.huaweiHonor;
+    } else if (isSamsung) {
+      return links.samsung;
+    } else if (isIOS) {
+      return links.ios;
+    } else if (isGenericAndroid) {
+      return links.android;
+    } else if (!isMobile) {
+      return links.desktop;
+    } else {
+      return links.default;
+    }
+  }
 
-  const inputRefs = useRef([]) 
- 
-  const onFocus = (index) => inputRefs.current[index]?.select() 
- 
-  const setVal = (index, newVal, focusIndex) => { 
-    const newCode = code.map((val, i) => (i === index ? newVal : val)) 
- 
-    setCode(newCode) 
- 
-    if (focusIndex < code.length) { 
-      inputRefs.current[focusIndex].focus() 
-    } 
-  } 
- 
-  const onKeyDown = (index, event) => { 
-    const isNumericKey = /^\d$/.test(event.key) 
-    const acceptedKeys = ["Tab", "Alt"] 
- 
-    if (!acceptedKeys.includes(event.key) && !event.ctrlKey) { 
-      event.preventDefault() 
-    } 
- 
-    switch (event.key) { 
-      case "ArrowLeft": 
-        if (index > 0) inputRefs.current[index - 1].focus() 
-        break 
-      case "ArrowRight": 
-        if (index < code.length - 1) inputRefs.current[index + 1].focus() 
-        break 
-      case "Backspace": 
-        if (code[index] === "" && index > 0) { 
-          setVal(index - 1, "", index - 1) 
-        } else { 
-          setVal(index, "", index) 
-        } 
-        break 
-      case "Delete": 
-        setVal(index, "", index + 1) 
-        break 
-      default: 
-        if (!isNumericKey) break 
-        setVal(index, event.key, index + 1) 
-    } 
-  } 
- 
-  const onPaste = (e, index) => { 
-    e.preventDefault() 
-    const pastedVal = e.clipboardData.getData("text").slice(0, code.length) 
-    const newCode = [...code] 
- 
-    if (!/\d+/.test(pastedVal)) return 
- 
-    for (let i = 0; i < pastedVal.length && i + index < code.length; i++) { 
-      newCode[i + index] = pastedVal[i] 
-    } 
- 
-    setCode(newCode) 
- 
-    if (inputRefs.current[index + pastedVal.length - 1]) { 
-      inputRefs.current[index + pastedVal.length - 1].focus() 
-    } else { 
-      inputRefs.current.at(-1).focus() 
-    } 
-  } 
+  
+  // Пример использования
+  const deviceLink = getDeviceSpecificLink();
 
   return (
     <div className="inputWrapper"> 
-          {code.map((_, i) => ( 
-            <input 
-              key={i} 
-              type="text" 
-              inputMode="numeric" 
-              className={cn( 
-                "input", 
-                code[i] && "activeInput", 
-              )} 
-              pattern="\d*" 
-              value={code[i]} 
-              ref={(el) => { 
-                inputRefs.current[i] = el 
-              }} 
-              onKeyDown={(e) => onKeyDown(i, e)} 
-              onFocus={() => onFocus(i)} 
-              onPaste={(e) => onPaste(e, i)} 
-              maxLength={1} 
-              // eslint-disable-next-line jsx-a11y/no-autofocus 
-              autoFocus={i === 0} 
-              autoComplete="one-time-code" 
-            /> 
-          ))} 
+          Ссылка для вашего устройства: {deviceLink}
         </div> 
   );
 }
